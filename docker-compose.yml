@@ -1,0 +1,23 @@
+version: '3.2'
+services:
+  facedetect:
+    image: fdetect
+    ports:
+      - "5001:5000"
+    volumes:
+#      - type: volume
+#        source: foo
+#        target: /foo
+#        volume:
+#          nocopy: true
+      #the following bind mount allows code changes to become live upon save
+      - "src:/root/src"
+      #the following bind mount allows the camera to be visible to container
+      - "/tmp/.X11-unix:/tmp/.X11-unix"
+    entrypoint: 
+      - python
+      - '-B'
+      - /root/src/server.py
+#    deploy:
+#      mode: replicated
+#      replicas: ${FRONTSCALE:-1}
