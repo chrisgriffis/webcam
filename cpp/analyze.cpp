@@ -44,6 +44,9 @@ namespace my {
 	void Read(istream& ifs, C<T,A>& collection)
 	{
 		//cout << "reading collection" << endl;
+		
+		//lambda used here for "const initialization trick"
+		//to initialize a const value with multiple steps
 		const size_t N = [&ifs]
 		{
 			size_t val;
@@ -124,7 +127,7 @@ namespace my {
 		//	std::is_arithmetic<T>::value
 		//>
 	>
-	T center_of_gravity(vector<vector< T >>&& vvwt)
+	T elementwise_mean(vector<vector< T >>&& vvwt)
 	{
 		vector<T> flattened;
 		for(auto&& vwt : vvwt ) 
@@ -147,24 +150,26 @@ namespace my {
 int main(int argc, char *argv[])
 {
 	using namespace my;
-	vector<vector<B<unsigned>>> vvboxes;
+	using Box = B<unsigned>;
+	vector<vector<Box>> vvboxes;
 	ifstream ifs(argv[1]);
 	for (string s; std::getline(ifs, s); ) 
 	{
-		vector<B<unsigned>> vboxes;
+		vector<Box> vboxes;
 		stringstream ss(s);
 		Read(ss, vboxes);
 		vvboxes.push_back(vboxes);
 	}
 	
 	ofstream ofs(argv[2]);
-	B<unsigned> cg = std::move(center_of_gravity(std::move(vvboxes)));
-	ofs << "center of gravity: \n" << cg;
+	Box ewm = std::move(elementwise_mean(std::move(vvboxes)));
+	ofs << "element-wise mean: \n" << ewm;
 	
 	return 0;
 }
 
 //convert to collection of unit tests
+//CHECK_EQUALS(), ASSERT_TRUE() type stuff, etc
 int test(int argc, char *argv[])
 {
 	using namespace my;
