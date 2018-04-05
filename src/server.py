@@ -1,5 +1,7 @@
 import sys; sys.dont_write_bytecode = True; 
 import os, logging, json
+from os.path import abspath, basename, join as pjoin, exists as pexists
+from os import path as pa
 
 import flask
 from flask import jsonify
@@ -58,6 +60,23 @@ def stop():
 		return jsonify(endpoint='kill',markers='orphaned')
 	else:
 		return jsonify(endpoint='kill',markers='null_handle')
+
+@app.route('/data', methods=('GET',))
+@auto.doc(groups=['public','private'])
+def data():
+	''' look at the text file made during a framegrab run. refresh browser to get updated view; \
+	    during a detection run the file is being modified in realtime. \
+	'''
+	if pexists(pjoin('/root/output', 'box_samples.txt')):
+		return flask.send_from_directory('/root/output', 'box_samples.txt')
+	else:
+		return flask.Response(404,'file not found or path doesn\'t exist.')
+
+@app.route('/analyze', methods=('GET',))
+@auto.doc(groups=['public','private'])
+def analyze():
+	''' analyze the data in the data file. '''
+	return jsonify(foo='bar')
 
 if __name__ == '__main__':
 	#start up webserver
