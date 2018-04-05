@@ -4,6 +4,7 @@
 #include <vector>
 #include <type_traits>
 #include <sstream>
+#include <numeric>
 
 namespace my {
 	using namespace std;
@@ -80,6 +81,22 @@ namespace my {
 			_h=packet[3];
 			return *this;
 		}
+		B& operator+(B in)
+		{
+			_x+=in._x;
+			_y+=in._y;
+			_w+=in._w;
+			_h+=in._h;
+			return *this;
+		}
+		B& operator/(size_t denom)
+		{
+			_x/=denom;
+			_y/=denom;
+			_w/=denom;
+			_h/=denom;
+			return *this;
+		}
 		friend ostream& operator<<(ostream& s, B& b)
 		{
 			s <<
@@ -92,6 +109,7 @@ namespace my {
 	};
 	
 	//for debugging
+	//can work recursively on nesting for a collection of collections of collections...
 	template<template <class,class> class C, class T, class A>
 	ostream& operator<<(ostream& s, C<T,A>& v)
 	{
@@ -99,10 +117,55 @@ namespace my {
 		return s << endl;
 	}
 
+	template<
+		//template <class> class Wr,
+		typename T
+		//,typename = std::enable_if_t<
+		//	std::is_arithmetic<T>::value
+		//>
+	>
+	T center_of_gravity(vector<vector< T >>&& vvwt)
+	{
+		vector<T> flattened;
+		for(auto&& vwt : vvwt ) 
+			for(auto&& wt : vwt ) 
+				flattened.push_back(std::move(wt));
+		//boost zip iterator would be nice here
+		return [&flattened](T accum) {
+			return accum / flattened.size(); //integer division ok here for now
+		}(
+			std::accumulate(
+				std::next(flattened.begin()), flattened.end()
+				,flattened[0] //init val
+				,[](T a, T b) { return a + b; } //need to detect overflow...
+			)
+		);
+	}
 }
 
 
 int main(int argc, char *argv[])
+{
+	using namespace my;
+	vector<vector<B<unsigned>>> vvboxes;
+	ifstream ifs(argv[1]);
+	for (string s; std::getline(ifs, s); ) 
+	{
+		vector<B<unsigned>> vboxes;
+		stringstream ss(s);
+		Read(ss, vboxes);
+		vvboxes.push_back(vboxes);
+	}
+	
+	ofstream ofs(argv[2]);
+	B<unsigned> cg = std::move(center_of_gravity(std::move(vvboxes)));
+	ofs << "center of gravity: \n" << cg;
+	
+	return 0;
+}
+
+//convert to collection of unit tests
+int test(int argc, char *argv[])
 {
 	using namespace my;
 	//2 264 125 139 139, 97 112 141 141
@@ -124,7 +187,7 @@ int main(int argc, char *argv[])
 	}
 
 	std::cout << foo;
-	std::cout << vvboxes;
+	std::cout << vvboxes; //recursive nesting stream operator on a collection!!
 	return 0;
 }
 

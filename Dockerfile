@@ -24,7 +24,7 @@ RUN pip install flask-autodoc
 #this changes frequently, and changes invalidate subsequent image layers
 #so dont put anything too slow to build after this
 ADD src /root/src
-
+ADD bin /root/bin
 
 #set working directory in container
 WORKDIR /root/src

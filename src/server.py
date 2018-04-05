@@ -76,7 +76,13 @@ def data():
 @auto.doc(groups=['public','private'])
 def analyze():
 	''' analyze the data in the data file. '''
-	return jsonify(foo='bar')
+	if pexists(pjoin('/root/output', 'box_samples.txt')):
+		if pexists(pjoin('/root/output', 'analysis.txt')):
+			os.remove(pjoin('/root/output', 'analysis.txt'))
+		call(['/root/bin/analyzer.out','/root/output/box_samples.txt','/root/output/analysis.txt'])
+		return flask.send_from_directory('/root/output', 'analysis.txt')
+	else:
+		return flask.Response(404,'box_samples.txt not found or path doesn\'t exist.')
 
 if __name__ == '__main__':
 	#start up webserver
