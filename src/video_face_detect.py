@@ -112,7 +112,7 @@ with open('/root/output/box_samples.txt','w', 0) as outf: #unbuffered
 			outf.write(\
 				'%d %s\n'%\
 					(	len(sample), 
-						', '.join([' '.join(map(str,map(int,boxcoord))) for boxcoord in sample]) 
+						' '.join([' '.join(map(str,map(int,boxcoord))) for boxcoord in sample]) 
 					)
 			)
 
