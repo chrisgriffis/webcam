@@ -131,6 +131,7 @@ namespace my {
 		for(auto&& vwt : vvt ) 
 			for(auto&& wt : vwt ) 
 				flattened.push_back(std::move(wt));
+		return flattened;
 	}
 
 	//compute the elementwise mean
@@ -159,8 +160,11 @@ namespace my {
 				accum.first / vt.size(),
 				accum.second / vt.size()
 			); 
-		}(make_pair(0,0)
-/*
+		}(
+		
+		/// >>>>>>>>>>> START HERE  <<<<<<<<
+		// make_pair causing problem?
+		// https://stackoverflow.com/questions/46073491/segmentation-fault-with-stdfunction-and-lambda-parameters
 			std::accumulate(
 				std::next(vt.begin()), vt.end()
 				,vt[0] //init val
@@ -171,7 +175,6 @@ namespace my {
 					);
 				} //need to detect overflow...
 			)
-*/
 		);
 	}
 	
@@ -184,8 +187,10 @@ namespace my {
 	pair<T,T> center_of_gravity(const vector< B<T>>& vt)
 	{
 		using Box = B<T>;
-		vector<pair<T,T>> point_masses;
-		
+		using point_mass = pair<T,T>;
+		vector<point_mass> point_masses;
+
+/*		
 		//compute point masses
 		std::transform(
 			vt.begin(), vt.end() //input range
@@ -199,30 +204,31 @@ namespace my {
 				); 
 			}
 		);
+*/			
 		
 		//compute total mass
 		T total_mass = 0;
-/*		
 			std::accumulate(
 				std::next(vt.begin()), vt.end()
 				,vt[0]._w * vt[0]._h //init val
 				,[](T a, Box b) { 
 					return a + b._w * b._h; 
 				} //need to detect overflow...
-		);
-*/			
+			);
 		
 		//find unscaled cg
 		auto unscaled_cg = std::move(
 			//use above function
 			my::elementwise_mean(point_masses)
 		);
+/*		
 		
 		//return scaled result
 		return make_pair(
 				unscaled_cg.first/total_mass,
 				unscaled_cg.second/total_mass
 		);
+*/			
 		return make_pair(0,0);
 	}
 }
