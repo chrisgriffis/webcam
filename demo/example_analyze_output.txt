@@ -1,0 +1,2 @@
+element-wise mean: 
+x: 259; y: 185; w: 130; h: 130; 

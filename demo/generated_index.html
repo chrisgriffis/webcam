@@ -1,0 +1,145 @@
+<html>
+    <head>
+        <title>
+            Documentation
+            </title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                font-family: Verdana, "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+            }
+
+            body {
+                margin: 10px;
+            }
+
+            div.mapping {
+                margin: 20px 20px;
+            }
+
+            ul.methods:before { content: "Methods: "; }
+            ul.methods li {
+                display: inline;
+                list-style: none;
+            }
+            ul.methods li:after { content: ","; }
+            ul.methods li:last-child:after { content: ""; }
+
+            ul.arguments:before { content: "Arguments: "; }
+            ul.arguments li {
+                display: inline;
+                list-style: none;
+            }
+            ul.arguments .argument { font-style:italic }
+            ul.arguments .default:not(:empty):before { content: "("; }
+            ul.arguments .default:not(:empty):after { content: ")"; }
+            ul.arguments li:after { content: ","; }
+            ul.arguments li:last-child:after { content: ""; }
+
+            .docstring:before { content: "Description: "; }
+        </style>
+    </head>
+    <body>
+        <h1>
+            Documentation
+            </h1>
+
+        
+        <div class="mapping">
+            <a id="rule-/" class="rule"><h2>/</h2></a>
+            <ul class="methods">
+                    <li class="method">HEAD</li>
+                    <li class="method">OPTIONS</li>
+                    <li class="method">GET</li>
+                    
+            </ul>
+            <ul class="arguments">
+                
+                <li>
+                    <span class="argument">None</span>
+                    <span class="default"></span>
+                </li>
+                
+            </ul>
+            <p class="docstring"> returns api doc page </p>
+        </div>
+        
+        <div class="mapping">
+            <a id="rule-/analyze" class="rule"><h2>/analyze</h2></a>
+            <ul class="methods">
+                    <li class="method">HEAD</li>
+                    <li class="method">OPTIONS</li>
+                    <li class="method">GET</li>
+                    
+            </ul>
+            <ul class="arguments">
+                
+                <li>
+                    <span class="argument">None</span>
+                    <span class="default"></span>
+                </li>
+                
+            </ul>
+            <p class="docstring"> analyze the data in the data file. </p>
+        </div>
+        
+        <div class="mapping">
+            <a id="rule-/data" class="rule"><h2>/data</h2></a>
+            <ul class="methods">
+                    <li class="method">HEAD</li>
+                    <li class="method">OPTIONS</li>
+                    <li class="method">GET</li>
+                    
+            </ul>
+            <ul class="arguments">
+                
+                <li>
+                    <span class="argument">None</span>
+                    <span class="default"></span>
+                </li>
+                
+            </ul>
+            <p class="docstring"> look at the text file made during a framegrab run. refresh browser to get updated view; 	    during a detection run the file is being modified in realtime. 	</p>
+        </div>
+        
+        <div class="mapping">
+            <a id="rule-/kill" class="rule"><h2>/kill</h2></a>
+            <ul class="methods">
+                    <li class="method">HEAD</li>
+                    <li class="method">OPTIONS</li>
+                    <li class="method">GET</li>
+                    
+            </ul>
+            <ul class="arguments">
+                
+                <li>
+                    <span class="argument">None</span>
+                    <span class="default"></span>
+                </li>
+                
+            </ul>
+            <p class="docstring"> orphans the daemon process that is hosting the facedetect tool </p>
+        </div>
+        
+        <div class="mapping">
+            <a id="rule-/start" class="rule"><h2>/start</h2></a>
+            <ul class="methods">
+                    <li class="method">HEAD</li>
+                    <li class="method">OPTIONS</li>
+                    <li class="method">GET</li>
+                    
+            </ul>
+            <ul class="arguments">
+                
+                <li>
+                    <span class="argument">None</span>
+                    <span class="default"></span>
+                </li>
+                
+            </ul>
+            <p class="docstring"> 	starts the webcam face detect app. 	press q with the running app in the foreground to stop. 	go to /kill endpoint to clean up handle 	</p>
+        </div>
+        
+    </body>
+</html>

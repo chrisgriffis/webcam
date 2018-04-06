@@ -15,6 +15,15 @@ import numpy as np
 import argparse
 import math
 
+
+'''
+	detects faces from a live video stream, draws a box around each face, and
+	creates a trail from the center point of each face, effectively allowing you to 
+	"draw" on the live feed by moving your face around. keeps separate trails
+	for deparate faces which added a fun twist to an ostensibly straightforward idea.
+'''
+
+
 def closest(
 	reference, 
 	candidates, 
@@ -34,6 +43,7 @@ def closest(
 	return dist_to_cand[min(dist_to_cand.keys())]
 
 
+#args, maytee.
 p = argparse.ArgumentParser(description='provide optional overrides for parameters.')
 p.add_argument('--pathlen', type=int, action='store', default=100, help='length of the centerline trail')
 args = p.parse_args()
@@ -48,13 +58,18 @@ facepaths=[[]]
 sampler = []
 facecount=0
 
-with open('/root/output/box_samples.txt','w', 0) as outf: #unbuffered
+#unbuffered; immediate flush
+with open('/root/output/box_samples.txt','w', 0) as outf: 
+	
+	#loop forever until user presses 'q'
 	while (cv2.waitKey(1) & 0xFF != ord('q')):
+		
 		# Capture frame-by-frame
 		ret, frame = video_capture.read()
 		frame_count+=1
 		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
+		
+		#detect faces in frame
 		faces = faceCascade.detectMultiScale(
 			gray,
 			scaleFactor=1.1,
@@ -63,17 +78,23 @@ with open('/root/output/box_samples.txt','w', 0) as outf: #unbuffered
 			flags=cv2.CASCADE_SCALE_IMAGE
 		)
 
+		#reset the detection box center point trails if
+		#the number of detected faces changes
 		if not len(faces) or facecount!=len(faces):
 			facecount=len(faces)
 			facepaths=[[]]
-			
+		
+		#reinitialize trails when needed
+		#heuristic requires all trails to have at least one point in them
 		if len(faces) and not all(f for f in facepaths):
 			facepaths=[[(x+w/2,y+h/2)] for (x, y, w, h) in faces]
-		else:
+		else: #otherwise
+			
 			#first, prune stale points
 			for f in facepaths:
 				while len(f) >= args.pathlen:
 					f.pop(0)
+			
 			#process each detected face
 			for i,(x, y, w, h) in enumerate(faces):
 				# Draw a rectangle around the faces
@@ -102,12 +123,12 @@ with open('/root/output/box_samples.txt','w', 0) as outf: #unbuffered
 			'''
 			write to file in a format easy to read back in from c++
 			e.g.
-				2 264 125 139 139, 97 112 141 141
-				2 251 140 134 134, 129 105 92 92
-				3 81 146 134 134, 241 154 143 143, 124 120 99 99
-				2 249 168 144 144, 157 192 52 52
+				2 264 125 139 139 97 112 141 141
+				2 251 140 134 134 129 105 92 92
+				3 81 146 134 134 241 154 143 143, 124 120 99 99
+				2 249 168 144 144 157 192 52 52
 				1 252 169 146 146
-				2 249 179 150 150, 110 266 65 65
+				2 249 179 150 150 110 266 65 65
 			'''
 			outf.write(\
 				'%d %s\n'%\
