@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <sstream>
 #include <numeric>
+#include <algorithm>
 
 namespace my {
 	using namespace std;
@@ -84,22 +85,6 @@ namespace my {
 			_h=packet[3];
 			return *this;
 		}
-		B& operator+(B in)
-		{
-			_x+=in._x;
-			_y+=in._y;
-			_w+=in._w;
-			_h+=in._h;
-			return *this;
-		}
-		B& operator/(size_t denom)
-		{
-			_x/=denom;
-			_y/=denom;
-			_w/=denom;
-			_h/=denom;
-			return *this;
-		}
 		friend ostream& operator<<(ostream& s, B& b)
 		{
 			s <<
@@ -113,36 +98,132 @@ namespace my {
 	
 	//for debugging
 	//can work recursively on nesting for a collection of collections of collections...
-	template<template <class,class> class C, class T, class A>
+	template<
+		template <class,class> class C
+		, class T
+		, class A
+		//adding what follows for better template matching, 
+		//otherwise could look like a std::pair
+		, typename = decltype( 
+			declval<C<T,A>>().begin(), //require iterable
+			declval<C<T,A>>().end(), //require iterable
+			void())
+	>
 	ostream& operator<<(ostream& s, C<T,A>& v)
 	{
 		for (T& e : v) s << e;
 		return s << endl;
 	}
 
-	template<
-		//template <class> class Wr,
-		typename T
-		//,typename = std::enable_if_t<
-		//	std::is_arithmetic<T>::value
-		//>
-	>
-	T elementwise_mean(vector<vector< T >>&& vvwt)
+	//print a std::pair as a cartesian ordered pair
+	template<class T1, class T2>
+	ostream& operator<<(ostream& s, std::pair<T1,T2>& p)
+	{
+		s << "(" << p.first << "," << p.second << ")";
+		return s << endl;
+	}
+
+	//flatten by removing one dimension of nested containers
+	template<typename T>
+	vector<T> flatten(vector<vector< T >>&& vvt)
 	{
 		vector<T> flattened;
-		for(auto&& vwt : vvwt ) 
+		for(auto&& vwt : vvt ) 
 			for(auto&& wt : vwt ) 
 				flattened.push_back(std::move(wt));
-		//boost zip iterator would be nice here
-		return [&flattened](T accum) {
-			return accum / flattened.size(); //integer division ok here for now
+	}
+
+	//compute the elementwise mean
+	template<typename T>
+	T elementwise_mean(const vector< T>& vt)
+	{
+		return [&vt](T accum) {
+			return accum / vt.size(); //integer division ok here for now
 		}(
 			std::accumulate(
-				std::next(flattened.begin()), flattened.end()
-				,flattened[0] //init val
-				,[](T a, T b) { return a + b; } //need to detect overflow...
+				std::next(vt.begin()), vt.end()
+				,vt[0] //init val
+				,std::plus<T>() //need to detect overflow...
 			)
 		);
+	}
+	
+	//compute the elementwise mean
+	template<typename T>
+	std::pair<T,T> elementwise_mean(const vector<std::pair<T,T>>& vt)
+	{
+		using Tx = std::pair<T,T>;
+		return [&vt](Tx accum) {
+			//integer division ok here for now
+			return make_pair(
+				accum.first / vt.size(),
+				accum.second / vt.size()
+			); 
+		}(make_pair(0,0)
+/*
+			std::accumulate(
+				std::next(vt.begin()), vt.end()
+				,vt[0] //init val
+				,[](Tx a, Tx b) { 
+					return make_pair(
+						a.first + b.first,
+						a.second + b.second
+					);
+				} //need to detect overflow...
+			)
+*/
+		);
+	}
+	
+	//compute the center of gravity of unit mass boxes
+	template<typename T,
+		typename = std::enable_if_t<
+			std::is_arithmetic<T>::value
+		>
+	>
+	pair<T,T> center_of_gravity(const vector< B<T>>& vt)
+	{
+		using Box = B<T>;
+		vector<pair<T,T>> point_masses;
+		
+		//compute point masses
+		std::transform(
+			vt.begin(), vt.end() //input range
+			,point_masses.begin() //start of output range
+			,[](Box b) { //comput sum(mi*ri)
+				return make_pair(
+					//weighted centerpoint.x
+					(b._x + b._w/2)*b._w*b._h,
+					//weighted centerpoint.y
+					(b._y + b._h/2)*b._w*b._h
+				); 
+			}
+		);
+		
+		//compute total mass
+		T total_mass = 0;
+/*		
+			std::accumulate(
+				std::next(vt.begin()), vt.end()
+				,vt[0]._w * vt[0]._h //init val
+				,[](T a, Box b) { 
+					return a + b._w * b._h; 
+				} //need to detect overflow...
+		);
+*/			
+		
+		//find unscaled cg
+		auto unscaled_cg = std::move(
+			//use above function
+			my::elementwise_mean(point_masses)
+		);
+		
+		//return scaled result
+		return make_pair(
+				unscaled_cg.first/total_mass,
+				unscaled_cg.second/total_mass
+		);
+		return make_pair(0,0);
 	}
 }
 
@@ -162,8 +243,11 @@ int main(int argc, char *argv[])
 	}
 	
 	ofstream ofs(argv[2]);
-	Box ewm = std::move(elementwise_mean(std::move(vvboxes)));
-	ofs << "element-wise mean: \n" << ewm;
+	
+	auto vboxes = std::move(flatten(std::move(vvboxes)));
+	
+	auto cg = center_of_gravity(vboxes);
+	ofs << "center of gravity (closer faces are heavier): \n" << cg;
 	
 	return 0;
 }
