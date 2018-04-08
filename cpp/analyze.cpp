@@ -150,21 +150,21 @@ namespace my {
 	}
 	
 	//compute the elementwise mean
-	template<typename T>
+	template<typename T,
+		typename = std::enable_if_t<
+			std::is_arithmetic<T>::value
+		>
+	>
 	std::pair<T,T> elementwise_mean(const vector<std::pair<T,T>>& vt)
 	{
 		using Tx = std::pair<T,T>;
 		return [&vt](Tx accum) {
 			//integer division ok here for now
 			return make_pair(
-				accum.first / vt.size(),
-				accum.second / vt.size()
+				vt.size() ? accum.first / vt.size() : std::numeric_limits<T>::infinity(),
+				vt.size() ? accum.second / vt.size() : std::numeric_limits<T>::infinity()
 			); 
 		}(
-		
-		/// >>>>>>>>>>> START HERE  <<<<<<<<
-		// make_pair causing problem?
-		// https://stackoverflow.com/questions/46073491/segmentation-fault-with-stdfunction-and-lambda-parameters
 			std::accumulate(
 				std::next(vt.begin()), vt.end()
 				,vt[0] //init val
@@ -188,13 +188,12 @@ namespace my {
 	{
 		using Box = B<T>;
 		using point_mass = pair<T,T>;
-		vector<point_mass> point_masses;
+		vector<point_mass> point_unit_masses(vt.size());
 
-/*		
 		//compute point masses
 		std::transform(
 			vt.begin(), vt.end() //input range
-			,point_masses.begin() //start of output range
+			,point_unit_masses.begin() //start of output range
 			,[](Box b) { //comput sum(mi*ri)
 				return make_pair(
 					//weighted centerpoint.x
@@ -204,10 +203,9 @@ namespace my {
 				); 
 			}
 		);
-*/			
 		
 		//compute total mass
-		T total_mass = 0;
+		T total_mass =
 			std::accumulate(
 				std::next(vt.begin()), vt.end()
 				,vt[0]._w * vt[0]._h //init val
@@ -219,16 +217,14 @@ namespace my {
 		//find unscaled cg
 		auto unscaled_cg = std::move(
 			//use above function
-			my::elementwise_mean(point_masses)
+			my::elementwise_mean(point_unit_masses)
 		);
-/*		
 		
 		//return scaled result
 		return make_pair(
 				unscaled_cg.first/total_mass,
 				unscaled_cg.second/total_mass
 		);
-*/			
 		return make_pair(0,0);
 	}
 }
