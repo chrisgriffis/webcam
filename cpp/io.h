@@ -61,7 +61,7 @@ namespace my {
 				declval<C<T,A>>().end(), //require iterable
 				void())
 		>
-		std::ostream& operator<<(std::ostream& s, C<T,A>& v)
+		std::ostream& operator<<(std::ostream& s, C<T,A> v)
 		{
 			for (T& e : v) s << e;
 			return s << std::endl;
@@ -69,7 +69,7 @@ namespace my {
 
 		//print a std::pair as a cartesian ordered pair
 		template<class T1, class T2>
-		std::ostream& operator<<(std::ostream& s, std::pair<T1,T2>& p)
+		std::ostream& operator<<(std::ostream& s, std::pair<T1,T2> p)
 		{
 			s << "(" << p.first << "," << p.second << ")";
 			return s << std::endl;
