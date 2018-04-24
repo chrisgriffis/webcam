@@ -10,6 +10,9 @@ this is a toy-grade effort to meet the challenge and showcase polyglottal full s
 - OO "Gang of Four" design patterns (not yet impl'd)
 - code that's clean&clever but still eminently readable with self-evident reasoning
 
+# requirements
+untested on any config other than Docker version 1.13.1, build 092cba3 on linux 16.04 LTS running from within a virtualbox vm on a windows host
+
 # description
 (Currently tested in an Ubuntu 16.04 LTS image running in VirtualBox)
 
@@ -20,10 +23,14 @@ The index endpoint '/' brings up a page that is the auto generated api doc for t
 the face detection aspect was grabbed from an online tutorial. I've taken that as a starting point and added the ability to create trails for each face that persist like mouse pointer trails. to make trails i accumulated points across frames and drew an unclosed polygon on the current frame sent out to display. the fun part was dealing with multiple faces; a given frame may have multiple box definitions for multiply detected faces, but it doesnt know which face it's boxing. I devised a neat little heuristic that takes each face detect box center and find the closest tail point to append itself to.  
 
 # installation
-TBD
+docker pull chrisgriffispublic/webcam:latest
 
 # Usage
-TBD
+if using virtualbox or other VM host, select/enable a webcam as a visible device from host settings. for virtualbox, its under menubar>Devices>Webcams
+navigate to git home for project
+execute:
+$ sudo ./deploy.sh
+
 
 # example data output
 
