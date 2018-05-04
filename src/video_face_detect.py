@@ -79,7 +79,7 @@ def do_gradient(img):
 def do_canny(img):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	gray_canny = cv2.Canny(gray,50,100)
-	#gray_canny = cv2.threshold(gray_canny,254, 255, cv2.THRESH_BINARY_INV)
+	#return cv2.threshold(gray_canny,2, 255, cv2.THRESH_BINARY_INV)[1]
 	return gray_canny
 
 def HoughOutline(img):
@@ -100,6 +100,15 @@ def HoughOutline(img):
 	
 	return img
 
+def do_segment(img,k=2):
+	criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 0.2)
+	retval, labels, centers = cv2.kmeans(np.float32(img.reshape((-1,3))), k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+	centers = np.uint8(centers)
+	segmented_data = centers[labels.flatten()]
+	segmented_image = segmented_data.reshape((img.shape))
+	#labels_reshape = labels.reshape(image.shape[0], image.shape[1])
+	#print('labels_reshape\n',labels_reshape)
+	return segmented_image
 
 def run():
 
@@ -121,6 +130,8 @@ def run():
 			# Capture frame-by-frame
 			ret, frame = video_capture.read()
 			frame_count+=1
+
+
 			gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 			#detect faces in frame
@@ -152,7 +163,7 @@ def run():
 				#process each detected face
 				for i,(x, y, w, h) in enumerate(faces):
 					# Draw a rectangle around the faces
-					#cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+					cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 					
 					boxcenter=(x+w/2,y+h/2)
 					canddict = {}
@@ -196,6 +207,7 @@ def run():
 			#cv2.imshow('Videox', gray_smooth_x)
 			cv2.imshow('Videoc', do_canny(frame))
 			#cv2.imshow('Video2', frame)
+			#cv2.imshow('Videoc', do_segment(frame,3))
 			'''
 			if frame_count%2==0: 
 				cv2.imshow('Video', gray_smooth_x) 
