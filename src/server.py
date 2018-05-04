@@ -32,12 +32,7 @@ def start():
 	go to /kill endpoint to clean up handle \
 	'''
 
-	def launch():
-		''' callback for starting up the face detection '''
-		#could import module and call directly, 
-		#but will launch as a subprocess so its on its own thread
-		call(['/root/src/video_face_detect.py'])
-	
+	from video_face_detect import run as launch
 	global p
 	if not p:
 		p = Process(target=launch)
@@ -57,7 +52,7 @@ def stop():
 	if p:
 		p.terminate() #p.join would wait for video loop to die, freezing the webserver
 		p=None
-		return jsonify(endpoint='kill',markers='orphaned')
+		return jsonify(endpoint='kill',markers='daemon process termed')
 	else:
 		return jsonify(endpoint='kill',markers='null_handle')
 
@@ -87,4 +82,4 @@ def analyze():
 if __name__ == '__main__':
 	#start up webserver
 	app.logger.setLevel(logging.DEBUG)
-	app.run(host='0.0.0.0', debug=True)
+	app.run(host='0.0.0.0',debug=True)
